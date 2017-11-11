@@ -83,10 +83,98 @@ void got_packet(u_char* args, const struct pcap_pkthdr * header, const u_char *p
     printf("\n");
 }
 
+void print_help(){
+	printf("Usage: ./packet_analyser [OPTIONS]\n");
+	printf("Options : \n");
+	printf("\t -i <ifname>\n");
+	printf("\t -o <file to read> (offline analysis)\n");
+	printf("\t -f <filter> \n");
+	printf("\t -v <verbosity> \n");
+	printf("NOTE : i and o options can't be set simultaneously\n");
+}
+
+void print_usage(){
+	printf("Error while parsing options \n");
+	print_help();
+}
+
 
 int main(int argc, char **argv){
 	char error_buffer[PCAP_ERRBUF_SIZE];
-	pcap_if_t* dev = chose_dev();	
+	char* dev = NULL;
+	char* filter = NULL;
+	char* file_in = NULL;
+	int verbose = 3;
+
+	while(c = getopt(argc, argv, "i:o:f:v:")){
+		switch(c){
+			case 'i':
+				if (file_in != NULL){
+					print_usage();
+					exit(EXIT_FAILURE);
+				}
+				dev = strdup(optarg);
+				break;
+			case 'o':
+				if(dev != NULL){
+					print_usage()
+					exit(EXIT_FAILURE);
+				}
+				file_in = strdup(optarg);
+				break;
+			case 'f':
+				filter = strdup(optarg);
+				break;
+			case 'v':
+				verbose = atoi(optarg);
+				break;
+			case 'h':
+				print_help();
+				break;
+			default:
+				print_usage();
+				exit(EXIT_FAILURE);
+		} // end switch			
+	} // end while getopt
+
+	// no file -> live capture
+	if ( file_in == NULL ) {
+		if ( dev == NULL ){
+			dev = pcap_lookupdev(error_buffer);
+			if(!dev){
+				printf("Error : default interface not found \n");
+				exit(EXIT_FAILURE);			
+			}
+		}
+		pcap_t* dev_fd = pcap_open_live(dev, MAX_BYTE, PROMISC_MODE, 0, error_buffer);
+		if(!dev_fd){
+			printf("Error while opening interface\n");
+			exit(EXIT_FAILURE);
+		}
+	} else {
+		pcap_t* file_fd = pcap_open_offline(file_in, error_buffer);
+		if(!file_fd){
+			printf("Error while opening file\n");
+			//TODO close ?
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	if(!filter){
+		struct bpf_program* filter_bpf ;
+		bpf_u_int32* ip_dev = NULL;
+		bpf_u_int32* subnet_mask = NULL;
+		if (pcap_compile(dev_fd, filter_bpf, filtre, 0, subnet_mask) == -1 || pcap_setfilter(dev_fd, filter_bpf)){
+			//TODO free + afficher l'erreur du filtre + séparer les deux tests
+			printf("Error while setting filter \n");
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	pcap_loop(dev_fd, -1, got_packet, NULL);
+
+}
+/*	pcap_if_t* dev = chose_dev();	
 	printf(" Interface : %s\n", dev->name);
 	pcap_t* dev_fd = pcap_open_live(dev->name, MAX_BYTE, PROMISC_MODE, 0, error_buffer);
 	//TODO: Exit si erreur?
@@ -96,7 +184,7 @@ int main(int argc, char **argv){
 	struct bpf_program* filtre ;
 	CHECK(pcap_compile(dev_fd, filtre, "ip", 0, subnet_mask) != -1);
 	pcap_setfilter( dev_fd, filtre);
-	pcap_loop(dev_fd, -1, got_packet, NULL);
+	pcap_loop(dev_fd, -1, got_packet, NULL);*/
 	return 0;
 }
 
