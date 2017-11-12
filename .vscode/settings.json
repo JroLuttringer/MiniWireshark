@@ -1,0 +1,13 @@
+{
+  "files.associations": {
+    "check.h": "c",
+    "string.h": "c",
+    "pcap.h": "c",
+    "stdlib.h": "c",
+    "ethernet.h": "c",
+    "my_ip.h": "c",
+    "stdio.h": "c",
+    "inet.h": "c"
+  },
+  "C_Cpp.errorSquiggles": "Disabled"
+}
