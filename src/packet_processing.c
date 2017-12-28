@@ -1,6 +1,6 @@
 #include "../include/packet_processing.h"
 
-void packet2hexa(const u_char* packet, const struct pcap_pkthdr* header) {
+void packet_to_hexa(const u_char* packet, const struct pcap_pkthdr* header) {
   unsigned int i = 0;
   for (i = 0; i < header->len; i++) {
     if (i % 16 == 0) printf("\n");
@@ -9,7 +9,7 @@ void packet2hexa(const u_char* packet, const struct pcap_pkthdr* header) {
   printf("\n\n");
 }
 
-int process_network_layer(const u_char* packet, uint32_t network_id) {
+void process_network_layer(const u_char* packet, uint32_t network_id,int* transport_id) {
   int transport_layer = -1;
   switch (ntohs(network_id)) {
     case ETHERTYPE_IP:
@@ -21,16 +21,16 @@ int process_network_layer(const u_char* packet, uint32_t network_id) {
     default:
       printf("Not supported\n");
   }
-  return transport_layer;
+  *transport_id = transport_layer;
 }
 
-int process_transport_layer(const u_char* packet, int transport_id) {
+int process_transport_layer(const u_char* packet, int transport_id, int* port_src, int* port_dst, int* length) {
   switch (transport_id) {
     case UDP:
+      process_udp(packet, port_src, port_dst, length);
       break;
     case TCP:
-      break;
-    case ICMP:
+      process_tcp(packet, port_src, port_dst, length);
       break;
     default:
       return 0;
@@ -40,21 +40,26 @@ int process_transport_layer(const u_char* packet, int transport_id) {
 
 void got_packet(u_char* not_used, const struct pcap_pkthdr* header,
                 const u_char* packet) {
+  int network_id   = 0;
+  int transport_id = 0;
+  int port_dst = 0;
+  int port_src = 0;
+  int length = 0;
+
   printf("\n=================== Received packet ======================== \n");
   // print packet in hexa
-  packet2hexa(packet, header);
-
-  // process ethernet and go to network layer
-  uint32_t network_id = process_ethernet(packet);
+  packet_to_hexa(packet, header);
+  // process ethernet and set pointer to network layer
+  process_ethernet(packet, &network_id);
   packet += sizeof(struct ether_header);
-
-  // process network layer and go to transport layer
-  int transport_id = process_network_layer(packet, network_id);
-  if (transport_id == -1) return;
-
+  // process network layer and set pointer to transport layer
+  process_network_layer(packet, network_id, &transport_id);
   // process transport layer
-  process_transport_layer(packet, transport_id);
-
+  if(transport_id == ICMP){
+    process_icmp(packet);
+  } else {
+    process_transport_layer(packet, transport_id,&port_src, &port_dst, &length);
+  }
   printf("============================================================");
   printf("\n");
 }

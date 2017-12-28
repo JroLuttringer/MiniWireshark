@@ -30,8 +30,8 @@ char* ethernet_type(const struct ether_header* ethernet) {
   return type;
 }
 
-uint32_t process_ethernet(const u_char* packet) {
-  const struct ether_header* ethernet;
+void process_ethernet(const u_char* packet, int* network_id) {
+  struct ether_header* ethernet;
   ethernet = (struct ether_header*)(packet);
   printf("\nEthernet :\n");
   printf("\tSource        : ");
@@ -40,5 +40,5 @@ uint32_t process_ethernet(const u_char* packet) {
   ethaddr2hexa(ethernet->ether_dhost);
   printf("\tType : 0x%04x %s \n\n", ntohs(ethernet->ether_type),
          ethernet_type(ethernet));
-  return ethernet->ether_type;
+  *network_id = ethernet->ether_type;
 }
