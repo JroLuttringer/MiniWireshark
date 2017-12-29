@@ -13,20 +13,20 @@ char* ethernet_type(const struct ether_header* ethernet) {
   char* type;
   switch (ntohs(ethernet->ether_type)) {
     case ETHERTYPE_IP:
-      type = "( IP )";
+      type = " IP ";
       break;
     case ETHERTYPE_ARP:
-      type = "( ARP )";
+      type = " ARP ";
       break;
     case ETHERTYPE_IPV6:
-      type = "( IPV6 )";
+      type = " IPV6 ";
       break;
     case ETHERTYPE_REVARP:
-      type = "( REVERSE ARP )";
+      type = " REVERSE ARP ";
       break;
     default:
       type = "";
-  }
+    }
   return type;
 }
 
@@ -38,7 +38,8 @@ void process_ethernet(const u_char* packet, int* network_id) {
   ethaddr2hexa(ethernet->ether_shost);
   printf("\tDestination   : ");
   ethaddr2hexa(ethernet->ether_dhost);
-  printf("\tType : 0x%04x %s \n\n", ntohs(ethernet->ether_type),
-         ethernet_type(ethernet));
+  printf("\tType : %s 0x%04x \n\n", ethernet_type(ethernet),
+     ntohs(ethernet->ether_type)
+    );
   *network_id = ethernet->ether_type;
 }

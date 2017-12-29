@@ -11,13 +11,28 @@
 #include "../include/check.h"  // Check & exit if error
 #include "../include/my_ethernet.h"
 #include "../include/my_ip.h"
+#include "../include/my_icmp.h"
 #include "../include/udp_tcp.h"
+#include <ctype.h> // for isalnum
+#include "../include/arp.h"
 
-#define MAX_BYTE 15000
+#define MAX_BYTE     15000
 #define PROMISC_MODE 1
-#define UDP 17
-#define TCP 6
-#define ICMP 1
+#define UDP          17
+#define TCP          6
+#define ICMP         1
+
+#define POP    110
+#define IMAP   143
+#define SMTP   25
+#define SMTPS  587
+#define HTTP   80
+#define DNS    53
+#define TELNET 23
+#define DHCP   67
+
+
+
 
 void got_packet(u_char*, const struct pcap_pkthdr*, const u_char*);
 

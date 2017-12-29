@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
            file_in, filter, verbose);
   }
 
-  if (!filter) {
+  if (filter) {
     struct bpf_program filter_bpf;
     bpf_u_int32 subnet_mask = 0;
     if (pcap_compile(fd, &filter_bpf, filter, 0, subnet_mask) == -1 ||

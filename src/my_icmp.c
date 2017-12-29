@@ -1,4 +1,4 @@
-#include "../include/icmp.h"
+#include "../include/my_icmp.h"
 
 void process_icmp(const u_char* packet){
     struct icmphdr* icmp_info = (struct icmphdr*) packet;
@@ -45,7 +45,7 @@ void process_icmp(const u_char* packet){
             printf("Address Mask Reply\n");
         break;
         default:
-            printf("Unknown TCP Type\n");
+            printf("Unknown ICMP Type\n");
         
         }
     if(icmp_info -> type == ICMP_DEST_UNREACH || icmp_info->type == ICMP_REDIRECT || icmp_info->type == ICMP_TIME_EXCEEDED){
@@ -98,6 +98,8 @@ void process_icmp(const u_char* packet){
             case ICMP_PREC_CUTOFF:
             printf("Precedence Cut Off\n");
             break;
+            default:
+            printf("Unknown Code\n");
         }
     }
     printf("\t Checksum: %d\n", ntohs(icmp_info->checksum));

@@ -24,7 +24,7 @@ int process_ip(const u_char* packet) {
   ip = (struct ip*)(packet);
   printf("IP :\n");
   printf(
-      "\tIHL : %d \n\tVersion : Ipv%d \n\tToS : 0x%02x \n\tLength : %d \n\tID "
+      "\tHeader Length : %d \n\tVersion : %d \n\tToS : 0x%02x \n\tLength : %d \n\tID "
       ": %d",
       ip->ip_hl, ip->ip_v, ip->ip_tos, ntohs(ip->ip_len), ntohs(ip->ip_id));
 
@@ -39,10 +39,10 @@ int process_ip(const u_char* packet) {
   printf(
       "\n\tFlags : 0x%02x\n\t\t Reserved bit : %d\n\t\t Don't Fragment : "
       "%d\n\t\t More Fragments : %d\n\tFragment Offset : %d\n\tttl : %d "
-      "\n\tProtocol : %d (%s) \n\tChecksum : "
+      "\n\tProtocol : %s (%d) \n\tChecksum : "
       "%d\n",
-      flags, reserved, dontfrag, morefrag, foffset, ip->ip_ttl, ip->ip_p,
-      protocol_name(ip->ip_p), ip->ip_sum);
+      flags, reserved, dontfrag, morefrag, foffset, ip->ip_ttl, protocol_name(ip->ip_p),
+      ip->ip_p, ip->ip_sum);
 
   struct in_addr ip_src, ip_dst;
   ip_src = ip->ip_src;

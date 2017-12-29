@@ -13,7 +13,7 @@ LDLIBS =  -lpcap
 
 ALL = all
 EXEC = analyse
-OBJFILES = obj/main.o obj/my_ethernet.o obj/my_ip.o obj/packet_processing.o obj/udp_tcp.o obj/icmp.o
+OBJFILES = obj/main.o obj/my_ethernet.o obj/my_ip.o obj/packet_processing.o obj/udp_tcp.o obj/my_icmp.o obj/arp.o
 
 
 $(ALL) : $(EXEC)

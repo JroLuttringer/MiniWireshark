@@ -29,8 +29,8 @@ void process_tcp(const u_char* packet, int* port_src, int* port_dst, int* length
     int window = ntohs(tcp_info->th_win);
     int cksum = ntohs(tcp_info->th_sum);
     *length = tcp_info->th_off * 4;
-    int seq = ntohl(tcp_info->th_seq);
-    int ack_seq = ntohl(tcp_info->ack_seq);
+    int seq = ntohs(tcp_info->th_seq);
+    int ack_seq = ntohs(tcp_info->ack_seq);
     int data_offset = tcp_info->th_off;
     int urg_pointer = ntohs(tcp_info->th_urp);
 
