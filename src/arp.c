@@ -66,7 +66,9 @@ void process_arp(const u_char* packet){
         printf("\tDestination MAC address: %s\n",ether_ntoa((struct ether_addr*)&test->arp_tha) );
         printf("\tDestination IP address: %s\n", inet_ntoa(*(struct in_addr*)&test->arp_tpa));
 
-    }       
+    } 
+    packet +=  sizeof(struct arphdr);
+    print_data(packet);   
         
 
 }

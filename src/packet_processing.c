@@ -8,7 +8,7 @@ void packet_to_hexa(const u_char* packet, const struct pcap_pkthdr* header) {
   }
   printf("\n\n");
   for (i = 0; i < header->len; i++) {
-    if (i % 16 == 0) printf("\n");
+    if (i % 20 == 0) printf("\n");
     if(isprint(packet[i]))
       printf(" %c", packet[i]);
     else
@@ -16,6 +16,23 @@ void packet_to_hexa(const u_char* packet, const struct pcap_pkthdr* header) {
   }
   printf("\n\n");
 }
+
+void print_ascii(const u_char* packet, int length) {
+  int i = 0;
+  int print_tab = 1;
+  for (i = 0; i < length; i++) {
+      if(print_tab){
+          printf("\t");
+          print_tab=0;
+      }
+      if(packet[i]=='\r') printf("\\r");
+      else if(packet[i]=='\n'){ printf("\\n"); printf("\n");} 
+      else if((isprint(packet[i]) || isspace(packet[i])))printf("%c", packet[i]);
+      if(packet[i]=='\n' && packet[i-1]=='\r') print_tab=1;
+  }
+  printf("\n\n");
+}
+
 
 void print_data(const u_char* packet) {
   unsigned int i = 0;
@@ -28,13 +45,24 @@ void print_data(const u_char* packet) {
   printf(" ...\n");
 }
 
-int find_application(int port){
+int find_application(const u_char* packet, int port, int length, int is_source){
   switch(port){
-    case DHCP:
-      //process_dhcp(packet);
+    case IMAP:
+      process_imap(packet, length, is_source);
       break;
     case HTTP:
-     // process_http(packet);
+      process_http(packet, length, is_source);
+      break;
+    case POP:
+      process_pop(packet, length, is_source);
+      break;
+    case SMTP:
+    case SMTPS:
+      process_smtp(packet, length, is_source);
+      break;
+    case FTPC:
+    case FTPD:
+      process_ftp(packet, length, is_source);
       break;
     default:
       return 0;
@@ -42,13 +70,11 @@ int find_application(int port){
   return 1;  
 }
 
-void process_app(const u_char* packet, int port_src, int port_dest){
-  if( !find_application(port_src) && !find_application(port_dest)){
+void process_app(const u_char* packet, int port_src, int port_dest, int length){
+  if( !find_application(packet,port_src, length, 1) && !find_application(packet,port_dest, length, 0)){
     printf(" Application not found.\n");
   }
 }
-
-
 
 void process_network_layer(const u_char* packet, uint32_t network_id,int* transport_id) {
   int transport_layer = -1;
@@ -87,6 +113,7 @@ void got_packet(u_char* not_used, const struct pcap_pkthdr* header,
   int port_dst = 0;
   int port_src = 0;
   int length = 0;
+  int total_length = 0;
 
   printf("\n=================== Received packet ============================================================ \n");
   // print packet in hexa
@@ -94,6 +121,7 @@ void got_packet(u_char* not_used, const struct pcap_pkthdr* header,
   // process ethernet and set pointer to network layer
   process_ethernet(packet, &network_id);
   packet += sizeof(struct ether_header);
+  total_length += sizeof(struct ether_header);
 
   // process network layer and set pointer to transport layer
   process_network_layer(packet, network_id, &transport_id);
@@ -101,14 +129,18 @@ void got_packet(u_char* not_used, const struct pcap_pkthdr* header,
   // Process transport layer or ICMP
   if(ntohs(network_id) == ETHERTYPE_IP){
     packet += sizeof(struct ip);
+    total_length += sizeof(struct ip);
     if(transport_id == ICMP){
       process_icmp(packet);
       packet += sizeof(struct icmphdr)+8;
       print_data(packet);
+
     } else {
-      process_transport_layer(packet, transport_id,&port_src, &port_dst, &length);
+      process_transport_layer(packet, transport_id, &port_src, &port_dst, &length);
       packet += length;
-      process_app(packet,port_src, port_dst);
+      total_length += length;
+      process_app(packet, port_src, port_dst, header->len - total_length);
+
     }
   } 
 

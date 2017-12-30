@@ -15,6 +15,7 @@
 #include "../include/udp_tcp.h"
 #include <ctype.h> // for isalnum
 #include "../include/arp.h"
+#include "../include/http_imap_pop_smtp_ftp.h"
 
 #define MAX_BYTE     15000
 #define PROMISC_MODE 1
@@ -30,10 +31,14 @@
 #define DNS    53
 #define TELNET 23
 #define DHCP   67
+#define FTPD   20
+#define FTPC   21    
+
+#define REQUEST 999
 
 
 
-
+void print_ascii(const u_char*, int length);
 void got_packet(u_char*, const struct pcap_pkthdr*, const u_char*);
-
+void print_data(const u_char*);
 #endif
