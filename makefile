@@ -13,7 +13,7 @@ LDLIBS =  -lpcap
 
 ALL = all
 EXEC = analyse
-OBJFILES = obj/main.o obj/my_ethernet.o obj/my_ip.o obj/packet_processing.o obj/udp_tcp.o obj/my_icmp.o obj/arp.o obj/http_imap_pop_smtp_ftp.o
+OBJFILES = obj/main.o obj/my_ethernet.o obj/my_ip.o obj/packet_processing.o obj/udp_tcp.o obj/my_icmp.o obj/arp.o obj/http_imap_pop_smtp_ftp.o obj/telnet.o
 
 
 $(ALL) : $(EXEC)
@@ -21,9 +21,9 @@ $(ALL) : $(EXEC)
 $(EXEC) : $(OBJFILES)
 	$(CC) -o $@ $^ $(LDLIBS)
 #	mv $@ $(BPATH)
-	
+
 $(OPATH)/%.o : $(CPATH)/%.c
 	$(CC) $(CFLAGS) -c $< $(IFLAGS) -o $@
 
-clean : 
-	rm -r $(OPATH)/* #$(BPATH)/* 
+clean :
+	rm -r $(OPATH)/* #$(BPATH)/*

@@ -16,6 +16,7 @@
 #include <ctype.h> // for isalnum
 #include "../include/arp.h"
 #include "../include/http_imap_pop_smtp_ftp.h"
+#include "../include/telnet.h"
 
 #define MAX_BYTE     15000
 #define PROMISC_MODE 1
@@ -32,7 +33,7 @@
 #define TELNET 23
 #define DHCP   67
 #define FTPD   20
-#define FTPC   21    
+#define FTPC   21
 
 #define REQUEST 999
 

@@ -26,7 +26,7 @@ void print_ascii(const u_char* packet, int length) {
           print_tab=0;
       }
       if(packet[i]=='\r') printf("\\r");
-      else if(packet[i]=='\n'){ printf("\\n"); printf("\n");} 
+      else if(packet[i]=='\n'){ printf("\\n"); printf("\n");}
       else if((isprint(packet[i]) || isspace(packet[i])))printf("%c", packet[i]);
       if(packet[i]=='\n' && packet[i-1]=='\r') print_tab=1;
   }
@@ -41,7 +41,7 @@ void print_data(const u_char* packet) {
     if(packet[i])
       printf("%02x", packet[i]);
     else break;
-  }  
+  }
   printf(" ...\n");
 }
 
@@ -64,10 +64,13 @@ int find_application(const u_char* packet, int port, int length, int is_source){
     case FTPD:
       process_ftp(packet, length, is_source);
       break;
+    case TELNET:
+      process_telnet(packet, length);
+      break;
     default:
       return 0;
   }
-  return 1;  
+  return 1;
 }
 
 void process_app(const u_char* packet, int port_src, int port_dest, int length){
@@ -125,7 +128,7 @@ void got_packet(u_char* not_used, const struct pcap_pkthdr* header,
 
   // process network layer and set pointer to transport layer
   process_network_layer(packet, network_id, &transport_id);
-            
+
   // Process transport layer or ICMP
   if(ntohs(network_id) == ETHERTYPE_IP){
     packet += sizeof(struct ip);
@@ -142,7 +145,7 @@ void got_packet(u_char* not_used, const struct pcap_pkthdr* header,
       process_app(packet, port_src, port_dst, header->len - total_length);
 
     }
-  } 
+  }
 
   // process transport layer
   printf("===================================================================================================");
