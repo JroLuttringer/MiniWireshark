@@ -37,7 +37,7 @@ void process_dns(const u_char* packet, int length){
   } else {
     printf("Request"); // 0
   }
-  printf("Opcode: ");
+  printf("Flags: ");
   print_dns_opcode(dns_info -> opcode);
   printf("Trucated: ");
   if(dns->tc){
@@ -51,6 +51,12 @@ void process_dns(const u_char* packet, int length){
   } else {
     printf("Do not query recursively\n");
   }
+  printf("Recursion authorized: ");
+  if(dns->ra){
+    printf("yes\n");
+  } else {
+    printf("no\n");
+  }
 
   if(dns_info->qr){
     printf("Authoritative: ");
@@ -58,7 +64,23 @@ void process_dns(const u_char* packet, int length){
     printf("Recursion available: ");
   }
 
+  printf("Questions: %d\n",dns_info->qdcount);
+  printf("Answer RRs: %d\n",dns_info->ancount);
+  printf("Authority RRs: %d\n",dns_info->nscount);
+  printf("Additional RRs: %d\n",dns_info->arcount);
 
+  if(dns_info->qdcount){
+    process_questions();
+  }
+  if(dns_info->ancount){
+    process_answers();
+  }
+  if(dns_info->nscount){
+    process_auth();
+  }
+  if(dns_info->arcount){
+    process_add();
+  }
 
 
 }

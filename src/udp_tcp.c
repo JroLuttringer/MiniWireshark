@@ -5,13 +5,14 @@ void process_udp(const u_char* packet, int* port_src, int* port_dst, int* length
     *port_src = ntohs(udp_info->uh_sport);
     *port_dst = ntohs(udp_info->uh_dport);
     int cksum = ntohs(udp_info->uh_sum);
-    *length = ntohs(udp_info->uh_ulen);
+    int length_data = ntohs(udp_info->uh_ulen);
 
     printf("UDP :\n");
     printf("\tSource Port : %d\n", *port_src);
     printf("\tDestination Port : %d\n", *port_dst);
     printf("\tChecksum : %d\n", cksum);
-    printf("\tLength: %d\n",*length);
+    printf("\tLength: %d\n",length_data);
+    *length = sizeof(struct udphdr);
     
 }
 

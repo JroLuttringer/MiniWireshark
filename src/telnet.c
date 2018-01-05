@@ -12,7 +12,7 @@ void process_telnet(const u_char* packet, int data_size){
         // Si subnegoc, afficher la subnegoc
         if(packet[i]==SB){
           display_option(packet[++i]);
-          while(!(packet[i]==IAC) && packet[i+1] == SE);
+          while(!(packet[i]==IAC) && packet[i+1] == SE)
             printf(" %d", packet[i++]);
           printf("\n");
         // sinon affichier l'option

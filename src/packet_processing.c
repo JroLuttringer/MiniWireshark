@@ -67,6 +67,9 @@ int find_application(const u_char* packet, int port, int length, int is_source){
     case TELNET:
       process_telnet(packet, length);
       break;
+    case DHCP:
+      process_bootp(packet);
+      break;
     default:
       return 0;
   }
