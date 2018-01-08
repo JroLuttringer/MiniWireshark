@@ -12,7 +12,7 @@
 #define UDP 17
 #define TCP 6
 #define ICMP 1
-void process_ethernet(const u_char* , int* );
+void process_ethernet(const u_char* , int*,int );
 char* ethernet_type(const struct ether_header*);
 void ethaddr2hexa();
 

@@ -33,8 +33,9 @@ void print_dhcp_type(int type){
   }
 }
 
-void print_dhcp_option(const u_char* packet,int indice){
-    printf("\t      | Option: (%d) ", packet[indice]);
+void print_dhcp_option(const u_char* packet,int indice,int verbose){
+    if(verbose == 3)
+      printf("%*c| Option: (%d) ",APP_SPACE,' ', packet[indice]);
     switch(packet[indice]){
       case TAG_CLIENT_ID:
         printf("Client identifier");
@@ -78,18 +79,23 @@ void print_dhcp_option(const u_char* packet,int indice){
     }
 }
 
-void process_dhcp(const u_char* packet){
+void process_dhcp(const u_char* packet,int verbose){
+
   int i = 0;
-  printf("%*c+ DHCP:\n",APP_SPACE,' ');
+  if(verbose != 3) printf("- DHCP : ");
+  else printf("%*c- DHCP:\n",APP_SPACE_HDR,' ');
   // vendor spec = 60 + 4 (magic cookie)
   while(i<60){
     //print Tlv
     int length = packet[i+1];
     if(packet[i] == TAG_END){
-      printf("\t%*cEnd\n",APP_SPACE,' ');
+      printf("%*cEnd\n",APP_SPACE,' ');
       break;
     }
-    print_dhcp_option(packet, i);
+    print_dhcp_option(packet, i, verbose);
+    if((packet[i] == TAG_DHCP_MESSAGE) && verbose != 3){
+      return;
+    }
 
     if(packet[i] == TAG_DHCP_MESSAGE && packet[i+1] == 1){
       i = i+3; // tout a déjà été lu dans les sous fonctions
@@ -107,60 +113,92 @@ void process_dhcp(const u_char* packet){
   }
 }
 
-
-void process_bootp(const u_char* packet){
+void process_bootp(const u_char* packet,int verbose){
   struct bootp* bootp_info = (struct bootp*) packet;
-  printf("%*c+ BOOTP: \n",APP_SPACE, ' ');
-  printf("\t%*c| Opcode: %d",APP_SPACE,' ', bootp_info->bp_op);
+
+  if(verbose == 1){
+    if(test_dhcp(bootp_info->bp_vend)){
+      process_dhcp(bootp_info->bp_vend + 4,verbose);
+    }
+    else {
+      printf("- BOOTP");
+      printf(" (%d)",bootp_info->bp_op);
+    }
+    return;
+  }
+  if(verbose == 2){
+    if(!test_dhcp(bootp_info->bp_vend)){
+      printf("- Bootp: ");
+      printf("Opcode: %d",bootp_info->bp_op);
+      if(bootp_info->bp_op == BOOTREPLY) {
+        printf("(Boot Reply)\n");
+      } else {
+        printf("(Boot Request)\n");
+      }
+    } else {
+      process_dhcp(bootp_info->bp_vend + 4,verbose);
+    }
+    return;
+  }
+
+  printf("%*c+ BOOTP: \n",APP_SPACE_HDR, ' ');
+  printf("%*c| Opcode: %d",APP_SPACE,' ', bootp_info->bp_op);
   if(bootp_info->bp_op == BOOTREPLY){
     printf("(Boot Reply)\n");
   } else {
     printf("(Boot Request)\n");
   }
   if(bootp_info->bp_htype != 1){
-    printf("\t%*c| Hardware Type: Unknown(%d)\n",APP_SPACE,' ', bootp_info->bp_htype);
+    printf("%*c| Hardware Type: Unknown(%d)\n",APP_SPACE,' ', bootp_info->bp_htype);
   } else {
-    printf("\t%*c| Hardware Type: Ethernet\n",APP_SPACE,' ');
+    printf("%*c| Hardware Type: Ethernet\n",APP_SPACE,' ');
   }
-  printf("\t%*c| Hardwadre address length: %d\n",APP_SPACE,' ', bootp_info->bp_hlen);
-  printf("\t%*c| Hops: %d\n",APP_SPACE,' ',bootp_info->bp_hops);
-  printf("\t%*c| Transaction ID: 0x%08x\n",APP_SPACE,' ', ntohl(bootp_info->bp_xid));
-  printf("\t%*c| Seconds elapsed: %d\n",APP_SPACE,' ', ntohs(bootp_info->bp_secs));
-  printf("\t%*c| Bootp flags: 0x%04x  \n",APP_SPACE,' ',bootp_info->bp_flags);
-  printf("\t%*c| Client IP Address: %s\n",APP_SPACE,' ',inet_ntoa(bootp_info->bp_ciaddr));
-  printf("\t%*c| Your (client) IP Address: %s\n",APP_SPACE,' ',inet_ntoa(bootp_info->bp_yiaddr));
-  printf("\t%*c| Next server IP Address: %s\n",APP_SPACE,' ',inet_ntoa(bootp_info->bp_siaddr));
-  printf("\t%*c| Relay IP Address: %s\n",APP_SPACE,' ',inet_ntoa(bootp_info->bp_giaddr));
-  printf("\t%*c| Client Mac Address: %s\n",APP_SPACE,' ',ether_ntoa((struct ether_addr*)&bootp_info->bp_chaddr));
+  printf("%*c| Hardwadre address length: %d\n",APP_SPACE,' ', bootp_info->bp_hlen);
+  printf("%*c| Hops: %d\n",APP_SPACE,' ',bootp_info->bp_hops);
+  printf("%*c| Transaction ID: 0x%08x\n",APP_SPACE,' ', ntohl(bootp_info->bp_xid));
+  printf("%*c| Seconds elapsed: %d\n",APP_SPACE,' ', ntohs(bootp_info->bp_secs));
+  printf("%*c| Bootp flags: 0x%04x  \n",APP_SPACE,' ',bootp_info->bp_flags);
+  printf("%*c| Client IP Address: %s\n",APP_SPACE,' ',inet_ntoa(bootp_info->bp_ciaddr));
+  printf("%*c| Your (client) IP Address: %s\n",APP_SPACE,' ',inet_ntoa(bootp_info->bp_yiaddr));
+  printf("%*c| Next server IP Address: %s\n",APP_SPACE,' ',inet_ntoa(bootp_info->bp_siaddr));
+  printf("%*c| Relay IP Address: %s\n",APP_SPACE,' ',inet_ntoa(bootp_info->bp_giaddr));
+  printf("%*c| Client Mac Address: %s\n",APP_SPACE,' ',ether_ntoa((struct ether_addr*)&bootp_info->bp_chaddr));
   if(*bootp_info->bp_sname)
-    printf("\t%*c| Server host name: %s\n",APP_SPACE,' ', bootp_info->bp_sname);
+    printf("%*c| Server host name: %s\n",APP_SPACE,' ', bootp_info->bp_sname);
   else
-    printf("\t%*c| Server host name not given\n",APP_SPACE,' ');
+    printf("%*c| Server host name not given\n",APP_SPACE,' ');
 
   if(*bootp_info->bp_file)
-    printf("\t%*c| Boot file name: %s\n",APP_SPACE,' ', bootp_info->bp_file);
+    printf("%*c| Boot file name: %s\n",APP_SPACE,' ', bootp_info->bp_file);
   else
-    printf("\t%*c| Boot file name not given\n",APP_SPACE,' ');
+    printf("%*c| Boot file name not given\n",APP_SPACE,' ');
 
-  int magic_cookie[4] = VM_RFC1048;
-  int dhcp = 1;
+  int dhcp = test_dhcp(bootp_info->bp_vend);
   int i ;
-  printf("\t%*c| Vendor spec: ",APP_SPACE,' ');
+  printf("%*c| Vendor spec: ",APP_SPACE,' ');
   for(i=0; i<4; i++){
     printf("%02x", bootp_info->bp_vend[i]);
-    if(magic_cookie[i] != bootp_info->bp_vend[i]){
-      dhcp = 0;
-    }
   }
 
   if(dhcp){
     printf(" (Magic cookie: DHCP)\n");
-    process_dhcp(bootp_info->bp_vend + 4);
+     printf("\n");
+    process_dhcp(bootp_info->bp_vend + 4,verbose);
   } else {
     printf("\n");
   }
 }
 
-
+int test_dhcp(const u_char* cookie){
+  int magic_cookie[4] = VM_RFC1048;
+  int dhcp = 1;
+  int i;
+  for(i=0; i<4; i++){
+    if(magic_cookie[i] != cookie[i]){
+      dhcp = 0;
+    }
+  }
+  return dhcp;
+}
 
 

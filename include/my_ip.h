@@ -12,6 +12,6 @@
 #define MOREFRAG 0b00100000
 #define FRAGOFF 0b0000000011111111
 
-int process_ip(const u_char*);
-
+int process_ip(const u_char*,int);
+char* protocol_name(int);
 #endif

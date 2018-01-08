@@ -1,5 +1,61 @@
 #include "../include/packet_processing.h"
 
+
+int verbose = 3;
+
+
+void got_packet(u_char* not_used, const struct pcap_pkthdr* header,
+                const u_char* packet) {
+  (void)not_used;
+  int network_id   = 0;
+  int transport_id = 0;
+  int port_dst = 0;
+  int port_src = 0;
+  int length = 0;
+  int total_length = 0;
+  static int nb_pqt = 1;
+  if(verbose != 1)
+    printf("\n======== Received packet #%d ====================================================================== \n\n",nb_pqt++);
+  else 
+    printf("#%4d:  ",nb_pqt++);
+    // print packet in hexa
+  if(verbose == 3)
+    packet_to_hexa(packet, header);
+  // process ethernet and set pointer to network layer
+  process_ethernet(packet, &network_id, verbose);
+  packet += sizeof(struct ether_header);
+  total_length += sizeof(struct ether_header);
+
+  // process network layer and set pointer to transport layer
+  process_network_layer(packet, network_id, &transport_id, verbose);
+
+  // Process transport layer or ICMP
+  if(ntohs(network_id) == ETHERTYPE_IP){
+    packet += sizeof(struct ip);
+    total_length += sizeof(struct ip);
+    if(transport_id == ICMP){
+      process_icmp(packet, verbose);
+      packet += sizeof(struct icmphdr)+8;
+      if(verbose > 1)
+        print_data(packet);
+
+    } else {
+      process_transport_layer(packet, transport_id, &port_src, &port_dst, &length, verbose);
+      packet += length;
+      total_length += length;
+      process_app(packet, port_src, port_dst, header->len - total_length, verbose);
+
+    }
+  }
+
+  // process transport layer
+  if(verbose != 1)
+    printf("\n===================================================================================================");
+  printf("\n");
+ 
+}
+
+
 void print_help() {
   printf("Usage: ./packet_analyser [OPTIONS]\n");
   printf("Options : \n");
@@ -22,7 +78,7 @@ int main(int argc, char** argv) {
   char* filter = NULL;
   char* file_in = NULL;
   pcap_t* fd = NULL;
-  int verbose = 3;
+ // int verbose = 3;
   int c;
   while ((c = getopt(argc, argv, "i:o:f:v:h")) != -1) {
     switch (c) {
@@ -83,7 +139,6 @@ int main(int argc, char** argv) {
     fd = pcap_open_offline(file_in, error_buffer);
     if (!fd) {
       printf("Error while opening file for offline analysis\n");
-      // TODO close ?
       exit(EXIT_FAILURE);
     }
     printf("Launching offline reading on %s, filter : %s, verbosity %d \n",
@@ -95,12 +150,16 @@ int main(int argc, char** argv) {
     bpf_u_int32 subnet_mask = 0;
     if (pcap_compile(fd, &filter_bpf, filter, 0, subnet_mask) == -1 ||
         pcap_setfilter(fd, &filter_bpf)) {
-      // TODO free + afficher l'erreur du filtre + séparer les deux tests
       printf("Error while setting filter. (Check filter syntax ?) \n");
       exit(EXIT_FAILURE);
     }
   }
 
   pcap_loop(fd, -1, got_packet, NULL);
+  if(dev) free(dev);
+  pcap_close(fd);
+  if(filter) free(filter);
+  if(file_in) free(file_in);
+
   return 0;
 }

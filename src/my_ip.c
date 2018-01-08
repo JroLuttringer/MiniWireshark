@@ -19,11 +19,27 @@ char* protocol_name(int id) {
   return name;
 }
 
-int process_ip(const u_char* packet) {
+int process_ip(const u_char* packet,int verbose) {
   const struct ip* ip;
   ip = (struct ip*)(packet);
+  struct in_addr ip_src, ip_dst;
+  ip_src = ip->ip_src;
+  ip_dst = ip->ip_dst;
+
+  if(verbose == 1){
+    printf(" -IP : from %15s ",inet_ntoa(ip_src));
+    printf("to %15s",inet_ntoa(ip_dst));
+    return ip->ip_p;
+  } 
+
+  if(verbose ==2){
+    printf("- IP Version %d, ",ip->ip_v);
+    printf("Src: %s  , ",inet_ntoa(ip_src));
+    printf("Dest: %s\n",inet_ntoa(ip_dst));
+    return ip->ip_p;
+  }
   printf("  + IP :\n");
-  printf("\t  | Header Length : %d \n\t  | Version : %d \n\t  | ToS : 0x%02x \n\t  | Length : %d \n\t  | ID: %d",
+  printf("    | Header Length : %d \n    | Version : %d \n    | ToS : 0x%02x \n    | Length : %d \n    | ID: %d",
   ip->ip_hl, ip->ip_v, ip->ip_tos, ntohs(ip->ip_len), ntohs(ip->ip_id));
 
   int reserved, dontfrag, morefrag, foffset;
@@ -35,16 +51,14 @@ int process_ip(const u_char* packet) {
   flags = flags >> 13;
 
   printf(
-      "\n\t  | Flags : 0x%02x\n\t    - Reserved bit : %d\n\t    - Don't Fragment : %d\n\t    - More Fragments : %d\n\t  | Fragment Offset : %d\n\t  | ttl : %d \n\t  | Protocol : %s (%d) \n\t  | Checksum : %d\n",
+      "\n    | Flags : 0x%02x\n      - Reserved bit : %d\n      - Don't Fragment : %d\n      - More Fragments : %d\n    | Fragment Offset : %d\n    | ttl : %d \n    | Protocol : %s (%d) \n    | Checksum : %d\n",
       flags, reserved, dontfrag, morefrag, foffset, ip->ip_ttl, protocol_name(ip->ip_p),
       ip->ip_p, ip->ip_sum);
 
-  struct in_addr ip_src, ip_dst;
-  ip_src = ip->ip_src;
-  ip_dst = ip->ip_dst;
-  printf("\t  | Source : %s\n", inet_ntoa(ip_src));
-  printf("\t  | Dest : %s\n", inet_ntoa(ip_dst));
-  printf("\t  +____\n");
+
+  printf("    | Source : %s\n", inet_ntoa(ip_src));
+  printf("    | Dest : %s\n", inet_ntoa(ip_dst));
+  printf("    +____\n");
   printf("\n");
   return ip->ip_p;
 }

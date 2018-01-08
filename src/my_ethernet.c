@@ -6,7 +6,7 @@ void ethaddr2hexa(const uint8_t* addr) {
     printf("%02x", addr[i]);
     if (i != 5) printf(":");
   }
-  printf("\n");
+
 }
 
 char* ethernet_type(const struct ether_header* ethernet) {
@@ -30,17 +30,26 @@ char* ethernet_type(const struct ether_header* ethernet) {
   return type;
 }
 
-void process_ethernet(const u_char* packet, int* network_id) {
+void process_ethernet(const u_char* packet, int* network_id,int verbose) {
   struct ether_header* ethernet;
   ethernet = (struct ether_header*)(packet);
+  *network_id = ethernet->ether_type;
+  if(verbose == 1) return;
+  if(verbose == 2){
+    printf("- Ethernet, ");ethaddr2hexa(ethernet->ether_shost);printf(" to ");ethaddr2hexa(ethernet->ether_dhost);
+    printf("\n");
+    return;
+  }
+  ethernet = (struct ether_header*)(packet);
   printf("\n+ Ethernet :\n");
-  printf("\t| Source        : ");
+  printf("  | Source        : ");
   ethaddr2hexa(ethernet->ether_shost);
-  printf("\t| Destination   : ");
+  printf("\n");
+  printf("  | Destination   : ");
   ethaddr2hexa(ethernet->ether_dhost);
-  printf("\t| Type : %s 0x%04x \n", ethernet_type(ethernet),
+  printf("\n");
+  printf("  | Type : %s 0x%04x \n", ethernet_type(ethernet),
      ntohs(ethernet->ether_type)
     );
-  printf("\t+___\n\n");
-  *network_id = ethernet->ether_type;
+  printf("  +___\n\n");
 }

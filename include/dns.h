@@ -47,7 +47,7 @@ struct resource {
 
 void display_rcode(int);
 int get_name(const u_char*, const u_char*  );
-void process_dns(const u_char* );
+void process_dns(const u_char*,int );
 void print_dns_opcode(int);
 
 #endif

@@ -1,53 +1,23 @@
 #include "../include/my_icmp.h"
 
-void process_icmp(const u_char* packet){
+void process_icmp(const u_char* packet,int verbose){
     struct icmphdr* icmp_info = (struct icmphdr*) packet;
-    printf("+ ICMP : \n");
-    printf("\t| Type : ");
-    switch(icmp_info->type){
-        case ICMP_ECHO:
-            printf(" Echo Request\n");
-        break;
-        case ICMP_ECHOREPLY:
-            printf(" Echo Reply\n");
-            break;
-        case ICMP_REDIRECT:
-            printf(" Redirect\n");
-            break;
-        case ICMP_DEST_UNREACH:
-            printf(" Destination Unreachable\n");
-            break;
-        case ICMP_SOURCE_QUENCH:
-            printf(" Source Quench\n");
-            break;
-        case ICMP_TIME_EXCEEDED:
-            printf(" Time Exceeded\n");
-            break;
-        case ICMP_PARAMETERPROB:
-            printf(" Parameter Problem\n");
-            break;
-        case ICMP_TIMESTAMP:
-            printf("Timestamp Request\n");
-            break;
-        case ICMP_TIMESTAMPREPLY:
-            printf("Timestamp Reply\n");
-            break;
-        case ICMP_INFO_REQUEST:
-            printf("Info Request\n");
-        break;
-        case ICMP_INFO_REPLY:
-            printf("Info reply\n");
-        break;
-        case ICMP_ADDRESS:
-            printf("Address Mask Requestion\n");
-        break;
-        case ICMP_ADDRESSREPLY:
-            printf("Address Mask Reply\n");
-        break;
-        default:
-            printf("Unknown ICMP Type\n");
-        
-        }
+    if(verbose ==1){
+        printf(" - ICMP ");
+        print_icmp_type(icmp_info->type);
+        return;
+    }
+    if(verbose ==2){
+        printf("- ICMP ");
+        print_icmp_type(icmp_info->type);
+        printf("\n");
+        return;
+    }
+    printf("%*c+ ICMP : \n",TSP_SPACE_HDR,' ');
+    printf("%*c| Type : ",TSP_SPACE,' ');
+    print_icmp_type(icmp_info->type);
+    printf("\n");
+
     if(icmp_info -> type == ICMP_DEST_UNREACH || icmp_info->type == ICMP_REDIRECT || icmp_info->type == ICMP_TIME_EXCEEDED){
         switch(icmp_info->code){
             case ICMP_NET_UNREACH:
@@ -102,9 +72,56 @@ void process_icmp(const u_char* packet){
             printf("Unknown Code\n");
         }
     }
-    printf("\t| Checksum: %d\n", ntohs(icmp_info->checksum));
-    printf("\t| Id : %d\n", ntohs(icmp_info->un.echo.id));
-    printf("\t| Sequence : %d\n", ntohs(icmp_info->un.echo.sequence));
+    printf("%*c| Checksum: %d\n",TSP_SPACE, ' ', ntohs(icmp_info->checksum));
+    printf("%*c| Id : %d\n",TSP_SPACE, ' ', ntohs(icmp_info->un.echo.id));
+    printf("%*c| Sequence : %d\n",TSP_SPACE, ' ', ntohs(icmp_info->un.echo.sequence));
 
     
+}
+
+void print_icmp_type(int type){
+    switch(type){
+        case ICMP_ECHO:
+            printf(" Echo Request");
+        break;
+        case ICMP_ECHOREPLY:
+            printf(" Echo Reply");
+            break;
+        case ICMP_REDIRECT:
+            printf(" Redirect");
+            break;
+        case ICMP_DEST_UNREACH:
+            printf(" Destination Unreachable");
+            break;
+        case ICMP_SOURCE_QUENCH:
+            printf(" Source Quench");
+            break;
+        case ICMP_TIME_EXCEEDED:
+            printf(" Time Exceeded");
+            break;
+        case ICMP_PARAMETERPROB:
+            printf(" Parameter Problem");
+            break;
+        case ICMP_TIMESTAMP:
+            printf("Timestamp Request");
+            break;
+        case ICMP_TIMESTAMPREPLY:
+            printf("Timestamp Reply");
+            break;
+        case ICMP_INFO_REQUEST:
+            printf("Info Request");
+        break;
+        case ICMP_INFO_REPLY:
+            printf("Info reply");
+        break;
+        case ICMP_ADDRESS:
+            printf("Address Mask Requestion");
+        break;
+        case ICMP_ADDRESSREPLY:
+            printf("Address Mask Reply");
+        break;
+        default:
+            printf("Unknown ICMP Type");
+        
+        }
 }

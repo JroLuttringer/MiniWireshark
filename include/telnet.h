@@ -37,7 +37,7 @@
 
 void display_command(u_char);
 void display_option(u_char);
-void process_telnet(const u_char*, int );
+void process_telnet(const u_char*, int,int );
 
 
 #endif

@@ -1,17 +1,22 @@
 #include "../include/telnet.h"
 
 
-void process_telnet(const u_char* packet, int data_size){
+void process_telnet(const u_char* packet, int data_size, int verbose){
   int i = 0;
-  printf("%*c+ TELNET: \n",APP_SPACE,' ');
+  if(verbose == 1 || verbose == 2){
+    printf(" - TELNET");
+    return;
+  }
+  printf("%*c+ TELNET: \n",APP_SPACE_HDR,' ');
   while (i < data_size){
     if(packet[i] == IAC) {
         i++; // carac IAC lu & afficher commande
         display_command(packet[i]);
-
+        printf(" ");
         // Si subnegoc, afficher la subnegoc
         if(packet[i]==SB){
           display_option(packet[++i]);
+          printf("\n");
           while(!(packet[i]==IAC) && packet[i+1] == SE)
             printf("%*c| %d", APP_SPACE,' ',packet[i++]);
           printf("\n");
@@ -19,14 +24,16 @@ void process_telnet(const u_char* packet, int data_size){
         } else {
           i++; // on option
           display_option(packet[i]);
+          printf("\n");
         }
     }
+    i++;
   }
 }
 
 
 void display_command(u_char command){
-  printf("(%d)", command);
+  printf("%*c(%d)",APP_SPACE, ' ', command);
   switch(command){
     case SE:
       printf(" end of subnegociation");
@@ -61,6 +68,12 @@ void display_command(u_char command){
     case WONT:
       printf(" Won't");
       break;
+    case DO:
+      printf(" Do");
+      break;
+    case DONT:
+      printf(" Don't");
+      break;
     case EC:
       printf(" Erase Char");
       break;
@@ -73,7 +86,7 @@ void display_command(u_char command){
 }
 
 void display_option(u_char option){
-  printf("(%d)",option );
+  printf(" (%d)",option );
   switch(option){
     case ECHO:
       printf(" Echo");
@@ -110,6 +123,9 @@ void display_option(u_char option){
       break;
     case LINE_WIDTH:
       printf(" Line Width");
+      break;
+    case 35:
+      printf(" X display localtion");
       break;
     default:
       printf(" Not supported");

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "../include/utils.h"
 #include <arpa/inet.h>
-void process_icmp(const u_char*);
+void process_icmp(const u_char*,int);
+void print_icmp_type(int);
 
 #endif

@@ -8,7 +8,7 @@
 #include <../include/packet_processing.h>
 #include "../include/utils.h"
 
-void process_arp(const u_char*);
-
+void process_arp(const u_char*,int);
+void print_opcode(int);
 
 #endif

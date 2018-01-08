@@ -38,11 +38,10 @@
 #define FTPD   20
 #define FTPC   21
 
-#define REQUEST 999
+void process_network_layer(const u_char* , uint32_t,int*, int );
+int process_transport_layer(const u_char* , int, int* , int* , int*, int );
+void process_app(const u_char*, int , int , int, int );
+int find_application(const u_char*, int , int , int,int );
 
 
-
-void print_ascii(const u_char*, int length);
-void got_packet(u_char*, const struct pcap_pkthdr*, const u_char*);
-void print_data(const u_char*);
 #endif

@@ -7,8 +7,8 @@
 #include <arpa/inet.h> 
 #include "../include/utils.h"
 
-void process_udp(const u_char* , int* , int* , int* );
+void process_udp(const u_char* , int* , int* , int*,int );
 
-void process_tcp(const u_char* , int*, int* , int*);
+void process_tcp(const u_char* , int*, int* , int*,int);
 
 #endif

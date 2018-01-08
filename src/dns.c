@@ -22,77 +22,123 @@ void print_dns_opcode(int opcode){
       printf("Not supported");
 
   }
-  printf("(%d)\n", opcode);
+  printf("(%d)", opcode);
 }
 
 
 
-void process_dns( const u_char* packet){
+void process_dns( const u_char* packet,int verbose){
   int i;
   HEADER* dns_info = (HEADER*) packet;
-  printf("%*c+ DNS:\n",APP_SPACE,' ');
-  printf("\t%*c| ID: %d\n",APP_SPACE,' ' ,ntohs(dns_info->id));
-  printf("\t%*c| Type: ",APP_SPACE,' ');
+  if(verbose == 1){
+    printf(" - DNS ");
+    if(dns_info->qr){
+      printf("Response");
+    } else {
+      printf("Request"); // 0
+    }
+    return ;
+  }
+  if(verbose == 2){
+    printf("- DNS, ID: %d, ",ntohs(dns_info->id));
+    if(dns_info->qr){
+      printf("Response ");
+    } else {
+      printf("Request "); // 0
+    }
+    printf("(");print_dns_opcode(dns_info -> opcode);printf("), ");
+    printf(" Questions: %d, ", ntohs(dns_info->qdcount));
+    printf(" Answer : %d, ", ntohs(dns_info->ancount));
+    printf(" Authority : %d, ", ntohs(dns_info->nscount));
+    printf(" Additional : %d ", ntohs(dns_info->arcount));
+    printf("\n");
+    return;
+  }
+  
+  printf("%*c+ DNS:\n",APP_SPACE_HDR,' ');
+  printf("%*c| ID: %d \n",APP_SPACE,' ' ,ntohs(dns_info->id));
+  printf("%*c| Type: ",APP_SPACE,' ');
   if(dns_info->qr){
     printf("Response\n");
   } else {
     printf("Request\n"); // 0
   }
-  printf("\t%*c| Flags: ",APP_SPACE,' ');
+  printf("%*c| Flags: ",APP_SPACE,' ');
   print_dns_opcode(dns_info -> opcode);
-  printf("\t%*c| Trucated: ",APP_SPACE,' ');
+  printf("\n");
+  printf("%*c  | Trucated: ",APP_SPACE,' ');
   if(dns_info->tc){
     printf("The message is truncated\n");
   } else {
     printf("The message is not truncated\n");
   }
-  printf("\t%*c| Recursion desired: ",APP_SPACE,' ');
+  printf("%*c  | Recursion desired: ",APP_SPACE,' ');
   if(dns_info->rd){
     printf("Do query recursively\n");
   } else {
     printf("Do not query recursively\n");
   }
-  printf("\t%*c| Recursion authorized: ",APP_SPACE,' ');
-  if(dns_info->ra){
-    printf("yes\n");
-  } else {
-    printf("no\n");
+  if(dns_info->qr){
+    printf("%*c  | Authoritative: ", APP_SPACE, ' ');
+    if(dns_info-> aa) {
+      printf("Server is an authority\n");
+    } else {
+      printf("Server is not an authority\n");
+    }
+    printf("%*c  | Recursion authorized: ",APP_SPACE,' ');
+    if(dns_info->ra){
+      printf("yes\n");
+    } else {
+      printf("no\n");
+    }
+    printf("%*c  | Answer Authenticated:", APP_SPACE, ' ');
+    if(dns_info -> ad){
+      printf(" Yes \n");
+    } else {
+      printf(" No \n");
+    }
+    display_rcode(dns_info->rcode);
   }
-  display_rcode(dns_info->rcode);
-  printf("\t%*c| Questions: %d\n",APP_SPACE, ' ', ntohs(dns_info->qdcount));
-  printf("\t%*c| Answer RRs: %d\n",APP_SPACE, ' ', ntohs(dns_info->ancount));
-  printf("\t%*c| Authority RRs: %d\n",APP_SPACE, ' ', ntohs(dns_info->nscount));
-  printf("\t%*c| Additional RRs: %d\n",APP_SPACE, ' ', ntohs(dns_info->arcount));
+  printf("%*c  | Non-authenticated data:", APP_SPACE, ' ');
+  if(dns_info->cd){
+    printf(" Acceptable\n");
+  } else {
+    printf(" Unacceptable\n");
+  }
+  printf("%*c| Questions: %d\n",APP_SPACE, ' ', ntohs(dns_info->qdcount));
+  printf("%*c| Answer RRs: %d\n",APP_SPACE, ' ', ntohs(dns_info->ancount));
+  printf("%*c| Authority RRs: %d\n",APP_SPACE, ' ', ntohs(dns_info->nscount));
+  printf("%*c| Additional RRs: %d\n",APP_SPACE, ' ', ntohs(dns_info->arcount));
   const u_char* following_info = packet + 12;//sizeof(HEADER);
 
   if(ntohs(dns_info->qdcount)){
-    printf("\t%*c| Questions: \n",APP_SPACE,' ');
+    printf("%*c| Questions: \n",APP_SPACE,' ');
     for(i=0; i<ntohs(dns_info->qdcount); i++){
-      printf("\t%*c --\n",APP_SPACE,' ');
-      printf("\t%*c  - Name: ",APP_SPACE,' ');
+      printf("%*c --\n",APP_SPACE,' ');
+      printf("%*c  - Name: ",APP_SPACE,' ');
       following_info = following_info + get_name(packet, following_info);
       struct qst* q = (struct qst*) following_info;
       printf("\n");
-      printf("\t%*c  - Type: %d\n",APP_SPACE,' ', ntohs(q->type));
-      printf("\t%*c  - Class: %d\n",APP_SPACE,' ', ntohs(q->clss));
+      printf("%*c  - Type: %d\n",APP_SPACE,' ', ntohs(q->type));
+      printf("%*c  - Class: %d\n",APP_SPACE,' ', ntohs(q->clss));
       following_info += QSTLEN;    
-      printf("\t%*c --\n\n",APP_SPACE,' '); 
+      printf("%*c --\n\n",APP_SPACE,' '); 
     }
   }
   if(ntohs(dns_info->ancount)){
-    printf("\t%*c| Answers: \n",APP_SPACE,' ');
+    printf("%*c| Answers: \n",APP_SPACE,' ');
     for(i=0; i<ntohs(dns_info->ancount); i++){
-      printf("\t%*c --\n",APP_SPACE,' ');
-      printf("\t%*c  - Name: ",APP_SPACE,' '); 
+      printf("%*c --\n",APP_SPACE,' ');
+      printf("%*c  - Name: ",APP_SPACE,' '); 
       following_info = following_info + get_name(packet,following_info);
       printf("%*c\n",APP_SPACE,' ');
       struct resource* r = (struct resource*) following_info;
-      printf("\t%*c  - Type: %d\n",APP_SPACE,' ', ntohs(r->type));
-      printf("\t%*c  - Class: %d\n",APP_SPACE,' ', ntohs(r->clss));
-      printf("\t%*c  - Ttl: %d\n",APP_SPACE,' ', ntohl(r->ttl));
-      printf("\t%*c  - Length: %d\n",APP_SPACE,' ', ntohs(r->length));
+      printf("%*c  - Type: %d\n",APP_SPACE,' ', ntohs(r->type));
+      printf("%*c  - Class: %d\n",APP_SPACE,' ', ntohs(r->clss));
+      printf("%*c  - Ttl: %d\n",APP_SPACE,' ', ntohl(r->ttl));
+      printf("%*c  - Length: %d\n",APP_SPACE,' ', ntohs(r->length));
       following_info += RSRLEN;
-      printf("\t%*c  - Data: ",APP_SPACE,' ');
+      printf("%*c  - Data: ",APP_SPACE,' ');
     //  if(ntohs(r->type) == 2){
     //    get_name(packet, following_info);
     //  } else if (ntohs(r->type)==1){
@@ -110,46 +156,46 @@ void process_dns( const u_char* packet){
 
   if(ntohs(dns_info->nscount)){
     for(i=0; i<ntohs(dns_info->nscount);i++){
-      printf("\t%*c| Authority:\n",APP_SPACE,' ');
-      printf("\t%*c --\n",APP_SPACE,' ');
-      printf("\t%*c  - Name:\n",APP_SPACE,' ');
+      printf("%*c| Authority:\n",APP_SPACE,' ');
+      printf("%*c --\n",APP_SPACE,' ');
+      printf("%*c  - Name:\n",APP_SPACE,' ');
       following_info += get_name(packet, following_info);
       printf("\n");
       struct resource* r = (struct resource*) following_info;
-      printf("\t%*c  - Type: %d\n",APP_SPACE,' ', ntohs(r->type));
-      printf("\t%*c  - Class: %d\n",APP_SPACE,' ', ntohs(r->clss));
-      printf("\t%*c  - Ttl: %d\n",APP_SPACE,' ', ntohl(r->ttl));
-      printf("\t%*c  - Length: %d\n",APP_SPACE,' ', ntohs(r->length));
+      printf("%*c  - Type: %d\n",APP_SPACE,' ', ntohs(r->type));
+      printf("%*c  - Class: %d\n",APP_SPACE,' ', ntohs(r->clss));
+      printf("%*c  - Ttl: %d\n",APP_SPACE,' ', ntohl(r->ttl));
+      printf("%*c  - Length: %d\n",APP_SPACE,' ', ntohs(r->length));
       following_info += RSRLEN;
       int j;
       for(j=0; j<ntohs(r->length); j++){
         if(isprint(following_info[j]))
           printf("%c", following_info[j]);
       }
-      printf("\t%*c --\n\n",APP_SPACE,' ');
+      printf("%*c --\n\n",APP_SPACE,' ');
       following_info += ntohs(r->length);
     }
   }
 
   if(ntohs(dns_info->arcount)){
-    printf("\t%*c| Additionals:\n",APP_SPACE,' ');
+    printf("%*c| Additionals:\n",APP_SPACE,' ');
     for(i=0; i<ntohs(dns_info->arcount);i++){
-      printf("\t%*c --\n",APP_SPACE,' ');
-      printf("\t%*c  - Name:\n",APP_SPACE,' ');
+      printf("%*c --\n",APP_SPACE,' ');
+      printf("%*c  - Name:\n",APP_SPACE,' ');
       following_info+=get_name(packet, following_info);
       printf("\n");
       struct resource* r = (struct resource*) following_info;
-      printf("\t%*c  - Type: %d\n",APP_SPACE,' ', ntohs(r->type));
-      printf("\t%*c  - Class: %d\n",APP_SPACE,' ', ntohs(r->clss));
-      printf("\t%*c  - Ttl: %d\n",APP_SPACE,' ', ntohl(r->ttl));
-      printf("\t%*c  - Length: %d\n",APP_SPACE,' ', ntohs(r->length));
+      printf("%*c  - Type: %d\n",APP_SPACE,' ', ntohs(r->type));
+      printf("%*c  - Class: %d\n",APP_SPACE,' ', ntohs(r->clss));
+      printf("%*c  - Ttl: %d\n",APP_SPACE,' ', ntohl(r->ttl));
+      printf("%*c  - Length: %d\n",APP_SPACE,' ', ntohs(r->length));
       following_info += RSRLEN;
       int j;
       for(j=0; j<ntohs(r->length); j++){
         if(isprint(following_info[j]))
           printf("%c", following_info[j]);
       }
-      printf("\t%*c --\n\n",APP_SPACE,' ');
+      printf("%*c --\n\n",APP_SPACE,' ');
       following_info += ntohs(r->length);
     }
   }
@@ -180,7 +226,7 @@ int get_name(const u_char* packet,const u_char* sub ){
 }
 
 void display_rcode(int rcode){
-  printf("\t%*c| Rcode: ",APP_SPACE,' ');
+  printf("%*c  | Rcode: ",APP_SPACE,' ');
   switch (rcode){
     case DNSNOERROR :
         printf("No error");
