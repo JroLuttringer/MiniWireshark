@@ -36,6 +36,8 @@ int find_application(const u_char* packet, int port, int length, int is_source,i
 }
 
 void process_app(const u_char* packet, int port_src, int port_dest, int length,int verbose){
+  // verification des deux ports 
+  // deuxieme vérification court-circuité si la première est vérifiée
   if( !find_application(packet,port_src, length, 1, verbose) && !find_application(packet,port_dest, length, 0, verbose)){
     printf(" Application not found.\n");
   }

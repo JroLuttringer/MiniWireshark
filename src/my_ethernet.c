@@ -6,7 +6,6 @@ void ethaddr2hexa(const uint8_t* addr) {
     printf("%02x", addr[i]);
     if (i != 5) printf(":");
   }
-
 }
 
 char* ethernet_type(const struct ether_header* ethernet) {

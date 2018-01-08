@@ -59,6 +59,7 @@ void process_tcp(const u_char* packet, int* port_src, int* port_dst, int* length
         printf("]"); 
         return;
     }
+
     if(verbose == 2){
         printf("- TCP, Src Port : %d, Dst Port : %d", ntohs(tcp_info->th_sport),ntohs(tcp_info->th_dport));
         printf(" [ ");
@@ -72,7 +73,7 @@ void process_tcp(const u_char* packet, int* port_src, int* port_dst, int* length
         return;
     }
 
-
+    // verbose 3
     printf("%*c+ TCP :\n",TSP_SPACE_HDR, ' ');
     printf("%*c| Source Port : %d\n",TSP_SPACE, ' ', *port_src);
     printf("%*c| Destination Port : %d\n",TSP_SPACE, ' ',*port_dst);

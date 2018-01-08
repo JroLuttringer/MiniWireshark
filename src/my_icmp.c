@@ -123,5 +123,5 @@ void print_icmp_type(int type){
         default:
             printf("Unknown ICMP Type");
         
-        }
+     }
 }

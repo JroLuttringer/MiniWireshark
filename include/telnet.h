@@ -35,8 +35,16 @@
 #define LINEMODE 34
 #define ENV_VAR 36
 
-void display_command(u_char);
-void display_option(u_char);
+/* Affiche en texte la commande telnet passée en argument */
+void display_command(int);
+
+/* Affiche en texte l'option telnet passée en argument */
+void display_option(int);
+
+/* Affiche les information Telnet 
+  contenu dans la couche application, suivant le niveau de verbosité
+  et le nombre d'octet à afficher
+*/
 void process_telnet(const u_char*, int,int );
 
 

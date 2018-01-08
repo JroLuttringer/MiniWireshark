@@ -80,19 +80,23 @@ void print_dhcp_option(const u_char* packet,int indice,int verbose){
 }
 
 void process_dhcp(const u_char* packet,int verbose){
-
   int i = 0;
   if(verbose != 3) printf("- DHCP : ");
+
+  // VERBOSITE TROIS
   else printf("%*c- DHCP:\n",APP_SPACE_HDR,' ');
+  
   // vendor spec = 60 + 4 (magic cookie)
   while(i<60){
-    //print Tlv
+    //print TLVs
     int length = packet[i+1];
     if(packet[i] == TAG_END){
       printf("%*cEnd\n",APP_SPACE,' ');
       break;
     }
     print_dhcp_option(packet, i, verbose);
+
+    // Si la verbosité est < 3, on affiche uniquement le type du message
     if((packet[i] == TAG_DHCP_MESSAGE) && verbose != 3){
       return;
     }
@@ -100,8 +104,8 @@ void process_dhcp(const u_char* packet,int verbose){
     if(packet[i] == TAG_DHCP_MESSAGE && packet[i+1] == 1){
       i = i+3; // tout a déjà été lu dans les sous fonctions
     } else {
-      i = i+2; // read T & L
-      // read V
+      i = i+2; // déjà lu T & L
+      // afficher la valeur entre crochet
       printf(" [ ");
       while(length > 0){
         printf("%01x ", packet[i++]);
@@ -115,7 +119,12 @@ void process_dhcp(const u_char* packet,int verbose){
 
 void process_bootp(const u_char* packet,int verbose){
   struct bootp* bootp_info = (struct bootp*) packet;
+  int i ;
 
+  /* Pour les verbosité < 3, on affiche uniquement les infos DHCP 
+  Si DHCP est présent, et bootp sinon
+  pour verbosité 3, on affiche les deux
+  */
   if(verbose == 1){
     if(test_dhcp(bootp_info->bp_vend)){
       process_dhcp(bootp_info->bp_vend + 4,verbose);
@@ -126,6 +135,7 @@ void process_bootp(const u_char* packet,int verbose){
     }
     return;
   }
+
   if(verbose == 2){
     if(!test_dhcp(bootp_info->bp_vend)){
       printf("- Bootp: ");
@@ -141,6 +151,7 @@ void process_bootp(const u_char* packet,int verbose){
     return;
   }
 
+  // VERBOSE 3
   printf("%*c+ BOOTP: \n",APP_SPACE_HDR, ' ');
   printf("%*c| Opcode: %d",APP_SPACE,' ', bootp_info->bp_op);
   if(bootp_info->bp_op == BOOTREPLY){
@@ -174,12 +185,12 @@ void process_bootp(const u_char* packet,int verbose){
     printf("%*c| Boot file name not given\n",APP_SPACE,' ');
 
   int dhcp = test_dhcp(bootp_info->bp_vend);
-  int i ;
   printf("%*c| Vendor spec: ",APP_SPACE,' ');
   for(i=0; i<4; i++){
     printf("%02x", bootp_info->bp_vend[i]);
   }
 
+  // Process DHCP si il y a du DHCP
   if(dhcp){
     printf(" (Magic cookie: DHCP)\n");
      printf("\n");
@@ -188,6 +199,7 @@ void process_bootp(const u_char* packet,int verbose){
     printf("\n");
   }
 }
+
 
 int test_dhcp(const u_char* cookie){
   int magic_cookie[4] = VM_RFC1048;

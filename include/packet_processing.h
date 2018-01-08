@@ -38,9 +38,23 @@
 #define FTPD   20
 #define FTPC   21
 
+/*
+  Traite la couche Réseau
+*/
 void process_network_layer(const u_char* , uint32_t,int*, int );
+/*
+  Traite la couche transport
+*/
 int process_transport_layer(const u_char* , int, int* , int* , int*, int );
+/*
+  Traite la couche application en appelant find_application
+*/
 void process_app(const u_char*, int , int , int, int );
+
+/*
+  Match les ports afin de trouver l'application associé, 
+  et lance la fonction appropriée
+*/
 int find_application(const u_char*, int , int , int,int );
 
 

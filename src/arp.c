@@ -12,6 +12,7 @@ void process_arp(const u_char* packet,int verbose){
     struct arphdr* arp_info = (struct arphdr*) packet;
     struct ether_arp* test = (struct ether_arp*) packet;
 
+    // VERBOSE UN ET DEUX
     if(verbose != 3) {
         printf("- [R]ARP from %15s, ",inet_ntoa(*(struct in_addr*)&test->arp_spa));
         printf("target %15s ,  ",inet_ntoa(*(struct in_addr*)&test->arp_tpa));
@@ -34,6 +35,7 @@ void process_arp(const u_char* packet,int verbose){
         default:
             printf("Unknown\n");
     }
+        
     printf("\t| Protocol type: ");
     switch(ntohs(arp_info->ar_pro)){
         case ETHERTYPE_IP:
@@ -45,24 +47,21 @@ void process_arp(const u_char* packet,int verbose){
         default:
             printf("Unkown\n");
     }
+        
     printf("\t| Hardware size: %d\n",arp_info->ar_hln);
     printf("\t| Protocol: %d\n",arp_info->ar_pln);
     printf("\t| Opcode: ");
     print_opcode(ntohs(arp_info->ar_op));
     if( (ntohs(arp_info->ar_hrd)==ARPHRD_ETHER) && (ntohs(arp_info->ar_pro) == ETHERTYPE_IP)) {
-       /* char* dest_mac_addr = ether_ntoa((struct ether_addr*)&test->arp_tha);  
-        char* sdr_mac_addr  = ether_ntoa((struct ether_addr*)&test->arp_sha);    
-        char* dest_ip_addr  = inet_ntoa(*(struct in_addr*)&test->arp_tpa) ;
-        char* sdr_ip_addr   =inet_ntoa(*(struct in_addr*)&test->arp_spa);*/
-
         printf("\t| Sender MAC address: %s\n", ether_ntoa((struct ether_addr*)&test->arp_sha));
         printf("\t| Sender IP address: %s\n", inet_ntoa(*(struct in_addr*)&test->arp_spa));
         printf("\t| Destination MAC address: %s\n",ether_ntoa((struct ether_addr*)&test->arp_tha) );
         printf("\t| Destination IP address: %s\n", inet_ntoa(*(struct in_addr*)&test->arp_tpa));
         printf("\t+____\n");
-
-    } 
-    packet +=  sizeof(struct arphdr);
+    }
+    
+    // avancer pointer et print data  
+    packet += sizeof(struct arphdr);
     print_data(packet);   
 }
 

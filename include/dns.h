@@ -4,7 +4,7 @@
 #include <arpa/nameser_compat.h>
 #include <stdio.h>
 #include <arpa/inet.h>
-#include <ctype.h> // for isalnum
+#include <ctype.h> // for isprint
 #include "../include/utils.h"
 
 
@@ -45,9 +45,30 @@ struct resource {
   u_int16_t length;
 };
 
+/*
+  Affiche en texte le Rcode
+  DNS passé en argument
+*/
 void display_rcode(int);
+
+/*
+  Fonction permettant d'afficher le nom DNS
+  Les deux pointeurs représentent le paquet entier,
+  et le début du nom dans le paquet 
+  La fonction est récursive
+*/
 int get_name(const u_char*, const u_char*  );
+
+/*
+  Fonction affichant les informations DNS
+  contenues dans le paquet suivant le niveau de verbosité voulu
+*/
 void process_dns(const u_char*,int );
+
+/* 
+  Affiche en texte l'opcode passé en 
+  argument
+*/
 void print_dns_opcode(int);
 
 #endif

@@ -10,29 +10,31 @@ void process_telnet(const u_char* packet, int data_size, int verbose){
   printf("%*c+ TELNET: \n",APP_SPACE_HDR,' ');
   while (i < data_size){
     if(packet[i] == IAC) {
-        i++; // carac IAC lu & afficher commande
-        display_command(packet[i]);
-        printf(" ");
-        // Si subnegoc, afficher la subnegoc
-        if(packet[i]==SB){
-          display_option(packet[++i]);
-          printf("\n");
-          while(!(packet[i]==IAC) && packet[i+1] == SE)
-            printf("%*c| %d", APP_SPACE,' ',packet[i++]);
-          printf("\n");
-        // sinon affichier l'option
-        } else {
-          i++; // on option
-          display_option(packet[i]);
-          printf("\n");
-        }
+      i++; // carac IAC lu & afficher commande
+      display_command(packet[i]);
+      printf(" ");
+
+      // Si subnegoc, afficher la subnegoc
+      if(packet[i]==SB){
+        display_option(packet[++i]);
+        printf("\n");
+        while(!(packet[i]==IAC) && packet[i+1] == SE)
+          printf("%*c| %d", APP_SPACE,' ',packet[i++]);
+        printf("\n");
+
+      // sinon affichier l'option
+      } else {
+        i++; // on option
+        display_option(packet[i]);
+        printf("\n");
+      }
     }
     i++;
   }
 }
 
 
-void display_command(u_char command){
+void display_command(int command){
   printf("%*c(%d)",APP_SPACE, ' ', command);
   switch(command){
     case SE:
@@ -85,7 +87,7 @@ void display_command(u_char command){
   }
 }
 
-void display_option(u_char option){
+void display_option(int option){
   printf(" (%d)",option );
   switch(option){
     case ECHO:

@@ -12,8 +12,21 @@
 #define UDP 17
 #define TCP 6
 #define ICMP 1
+
+/* Affiche les information Ethernet contenue dans le paquet
+  prend également en argument un pointeur afin de retourner
+  le type de la couche suivant (IP ou autre)
+*/
 void process_ethernet(const u_char* , int*,int );
+
+/*
+  Affiche en texte le type associé
+  */
 char* ethernet_type(const struct ether_header*);
-void ethaddr2hexa();
+
+/*
+  Affiche en hexa l'addresse MAC passé en argument
+*/
+void ethaddr2hexa(const uint8_t* addr);
 
 #endif

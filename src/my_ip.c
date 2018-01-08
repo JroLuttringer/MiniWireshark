@@ -38,6 +38,7 @@ int process_ip(const u_char* packet,int verbose) {
     printf("Dest: %s\n",inet_ntoa(ip_dst));
     return ip->ip_p;
   }
+  
   printf("  + IP :\n");
   printf("    | Header Length : %d \n    | Version : %d \n    | ToS : 0x%02x \n    | Length : %d \n    | ID: %d",
   ip->ip_hl, ip->ip_v, ip->ip_tos, ntohs(ip->ip_len), ntohs(ip->ip_id));

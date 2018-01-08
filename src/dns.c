@@ -33,9 +33,9 @@ void process_dns( const u_char* packet,int verbose){
   if(verbose == 1){
     printf(" - DNS ");
     if(dns_info->qr){
-      printf("Response");
+      printf("Response\n");
     } else {
-      printf("Request"); // 0
+      printf("Request\n"); // 0
     }
     return ;
   }
@@ -78,6 +78,7 @@ void process_dns( const u_char* packet,int verbose){
   } else {
     printf("Do not query recursively\n");
   }
+  /* Infos présentes uniquement dans une réponse */
   if(dns_info->qr){
     printf("%*c  | Authoritative: ", APP_SPACE, ' ');
     if(dns_info-> aa) {
@@ -99,18 +100,22 @@ void process_dns( const u_char* packet,int verbose){
     }
     display_rcode(dns_info->rcode);
   }
+  /* Fin infos uniques aux réponse */
+
   printf("%*c  | Non-authenticated data:", APP_SPACE, ' ');
   if(dns_info->cd){
     printf(" Acceptable\n");
   } else {
     printf(" Unacceptable\n");
   }
+  // Nombre de question, réponses, etc
   printf("%*c| Questions: %d\n",APP_SPACE, ' ', ntohs(dns_info->qdcount));
   printf("%*c| Answer RRs: %d\n",APP_SPACE, ' ', ntohs(dns_info->ancount));
   printf("%*c| Authority RRs: %d\n",APP_SPACE, ' ', ntohs(dns_info->nscount));
   printf("%*c| Additional RRs: %d\n",APP_SPACE, ' ', ntohs(dns_info->arcount));
   const u_char* following_info = packet + 12;//sizeof(HEADER);
 
+  /* Traitement des questions */
   if(ntohs(dns_info->qdcount)){
     printf("%*c| Questions: \n",APP_SPACE,' ');
     for(i=0; i<ntohs(dns_info->qdcount); i++){
@@ -125,6 +130,8 @@ void process_dns( const u_char* packet,int verbose){
       printf("%*c --\n\n",APP_SPACE,' '); 
     }
   }
+
+  /* Traitement des réponses */
   if(ntohs(dns_info->ancount)){
     printf("%*c| Answers: \n",APP_SPACE,' ');
     for(i=0; i<ntohs(dns_info->ancount); i++){
@@ -139,21 +146,18 @@ void process_dns( const u_char* packet,int verbose){
       printf("%*c  - Length: %d\n",APP_SPACE,' ', ntohs(r->length));
       following_info += RSRLEN;
       printf("%*c  - Data: ",APP_SPACE,' ');
-    //  if(ntohs(r->type) == 2){
-    //    get_name(packet, following_info);
-    //  } else if (ntohs(r->type)==1){
       int j;
       for(j=0; j<ntohs(r->length); j++){
         if(isprint(following_info[j]))
           printf("%c", following_info[j]);
       }   
-    //  }
       printf("\n");
       printf("\t%*c --\n\n",APP_SPACE,' ');
       following_info += ntohs(r->length);
     }
   }
-
+  
+  /* Traitement des Auth */
   if(ntohs(dns_info->nscount)){
     for(i=0; i<ntohs(dns_info->nscount);i++){
       printf("%*c| Authority:\n",APP_SPACE,' ');
@@ -177,6 +181,7 @@ void process_dns( const u_char* packet,int verbose){
     }
   }
 
+  /* Traitement des Addi */
   if(ntohs(dns_info->arcount)){
     printf("%*c| Additionals:\n",APP_SPACE,' ');
     for(i=0; i<ntohs(dns_info->arcount);i++){
@@ -204,15 +209,20 @@ void process_dns( const u_char* packet,int verbose){
 int get_name(const u_char* packet,const u_char* sub ){
   int is_ptr;
   int length=0;
+  // tant que le nom n'est pas terminé
   while(sub[length] != 0){
+    // vérifier si le premier octet indique que c'est un pointeur ( 0b11...)
     if(((u_int8_t)sub[length] & PTRMASK) == PTRVALUE){
+      // Si oui, récupérer les 14 bits indiquant l'offset
       u_int16_t offset = sub[length] << 8;
       offset |= sub[length+1];
       offset &= PTRINDEXMASK;
       is_ptr = 1;
+      // chercher le nom à l'offset indiqué
       get_name(packet, packet+offset);
       return 2;
     } else {
+      // si ce n'est pas un pointeur, afficher le nom
       if(isprint(sub[length+1]) && sub[length+1] != '\n')
         printf("%c",sub[length+1]);
       else

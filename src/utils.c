@@ -1,5 +1,6 @@
 #include "../include/utils.h"
 
+/* "en tête" : packet en hexa et en ascii */
 void packet_to_hexa(const u_char* packet, const struct pcap_pkthdr* header) {
   unsigned int i = 0;
   for (i = 0; i < header->len; i++) {
@@ -25,6 +26,7 @@ void print_ascii(const u_char* packet, int length) {
           printf("        ");
           print_tab=0;
       }
+        
       if(packet[i]=='\r') printf("\\r");
       else if(packet[i]=='\n'){ printf("\\n"); printf("\n");}
       else if((isprint(packet[i]) || isspace(packet[i])))printf("%c", packet[i]);
@@ -33,7 +35,7 @@ void print_ascii(const u_char* packet, int length) {
   printf("\n\n");
 }
 
-
+/* 50 premier data */
 void print_data(const u_char* packet) {
   unsigned int i = 0;
   printf("\t Data: ");

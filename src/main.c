@@ -14,41 +14,48 @@ void got_packet(u_char* not_used, const struct pcap_pkthdr* header,
   int length = 0;
   int total_length = 0;
   static int nb_pqt = 1;
+
+  // Petite séparation si nécessaire
   if(verbose != 1)
     printf("\n======== Received packet #%d ====================================================================== \n\n",nb_pqt++);
   else 
     printf("#%4d:  ",nb_pqt++);
-    // print packet in hexa
+
+  // afficher le paquet en hexa si nécessaire
   if(verbose == 3)
     packet_to_hexa(packet, header);
-  // process ethernet and set pointer to network layer
+
+  // Process ethernet, décaler le pointeur, et process la couche réseau
   process_ethernet(packet, &network_id, verbose);
   packet += sizeof(struct ether_header);
   total_length += sizeof(struct ether_header);
 
-  // process network layer and set pointer to transport layer
+  // process la couche réseau 
   process_network_layer(packet, network_id, &transport_id, verbose);
 
   // Process transport layer or ICMP
   if(ntohs(network_id) == ETHERTYPE_IP){
+    // Si on a traité de l'ip, on décale le pointeur de la taille de l'entete ip
     packet += sizeof(struct ip);
     total_length += sizeof(struct ip);
+    // si la couche suivant est de l'ICMP, on process l'icmp
     if(transport_id == ICMP){
       process_icmp(packet, verbose);
       packet += sizeof(struct icmphdr)+8;
       if(verbose > 1)
         print_data(packet);
-
+    
     } else {
+      // Sinon, on process la couche transport
       process_transport_layer(packet, transport_id, &port_src, &port_dst, &length, verbose);
+      // on décale le pointeur sur le début de la couche application
       packet += length;
       total_length += length;
+      // on traite la couche application
       process_app(packet, port_src, port_dst, header->len - total_length, verbose);
-
     }
   }
 
-  // process transport layer
   if(verbose != 1)
     printf("\n===================================================================================================");
   printf("\n");
@@ -160,6 +167,5 @@ int main(int argc, char** argv) {
   pcap_close(fd);
   if(filter) free(filter);
   if(file_in) free(file_in);
-
   return 0;
 }
