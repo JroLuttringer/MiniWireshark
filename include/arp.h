@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <arpa/inet.h>
 #include <../include/packet_processing.h>
+#include "../include/utils.h"
 
 void process_arp(const u_char*);
 

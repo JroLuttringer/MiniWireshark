@@ -2,8 +2,8 @@
 
 void process_icmp(const u_char* packet){
     struct icmphdr* icmp_info = (struct icmphdr*) packet;
-    printf("ICMP : \n");
-    printf("\t Type : ");
+    printf("+ ICMP : \n");
+    printf("\t| Type : ");
     switch(icmp_info->type){
         case ICMP_ECHO:
             printf(" Echo Request\n");
@@ -102,9 +102,9 @@ void process_icmp(const u_char* packet){
             printf("Unknown Code\n");
         }
     }
-    printf("\t Checksum: %d\n", ntohs(icmp_info->checksum));
-    printf("\t Id : %d\n", ntohs(icmp_info->un.echo.id));
-    printf("\t Sequence : %d\n", ntohs(icmp_info->un.echo.sequence));
+    printf("\t| Checksum: %d\n", ntohs(icmp_info->checksum));
+    printf("\t| Id : %d\n", ntohs(icmp_info->un.echo.id));
+    printf("\t| Sequence : %d\n", ntohs(icmp_info->un.echo.sequence));
 
     
 }

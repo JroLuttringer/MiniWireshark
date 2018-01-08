@@ -70,6 +70,9 @@ int find_application(const u_char* packet, int port, int length, int is_source){
     case DHCP:
       process_bootp(packet);
       break;
+    case DNS:
+      process_dns(packet);
+      break;
     default:
       return 0;
   }
@@ -120,8 +123,9 @@ void got_packet(u_char* not_used, const struct pcap_pkthdr* header,
   int port_src = 0;
   int length = 0;
   int total_length = 0;
+  static int nb_pqt = 1;
 
-  printf("\n=================== Received packet ============================================================ \n");
+  printf("\n======== Received packet #%d ============================================================ \n",nb_pqt++);
   // print packet in hexa
   packet_to_hexa(packet, header);
   // process ethernet and set pointer to network layer

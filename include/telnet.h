@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "../include/utils.h"
+
 #define WILL 251
 #define WONT 252
 #define DO 253

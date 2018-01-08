@@ -7,11 +7,13 @@ void process_udp(const u_char* packet, int* port_src, int* port_dst, int* length
     int cksum = ntohs(udp_info->uh_sum);
     int length_data = ntohs(udp_info->uh_ulen);
 
-    printf("UDP :\n");
-    printf("\tSource Port : %d\n", *port_src);
-    printf("\tDestination Port : %d\n", *port_dst);
-    printf("\tChecksum : %d\n", cksum);
-    printf("\tLength: %d\n",length_data);
+    printf("%*c+ UDP :\n",TSP_SPACE,' ');
+    printf("\t%*c| Source Port : %d\n",TSP_SPACE,' ', *port_src);
+    printf("\t%*c| Destination Port : %d\n",TSP_SPACE,' ', *port_dst);
+    printf("\t%*c| Checksum : %d\n",TSP_SPACE,' ', cksum);
+    printf("\t%*c| Length: %d\n",TSP_SPACE,' ',length_data);
+    printf("\t%*c+_____\n",TSP_SPACE,' ');
+    printf("\n");
     *length = sizeof(struct udphdr);
     
 }
@@ -36,20 +38,22 @@ void process_tcp(const u_char* packet, int* port_src, int* port_dst, int* length
     int urg_pointer = ntohs(tcp_info->th_urp);
 
 
-    printf("TCP :\n");
-    printf("\tSource Port : %d\n", *port_src);
-    printf("\tDestination Port : %d\n",*port_dst);
-    printf("\tSequence number : %d\n",seq);
-    printf("\tAck number : %d\n",ack_seq);
-    printf("\tData Offset : %d\n", data_offset );
-    printf("\tFlags :\n");
-    printf("\t\tFIN : %d\n",fin);
-    printf("\t\tSYN : %d\n",syn);
-    printf("\t\tRST : %d\n",rst);
-    printf("\t\tPSH : %d\n",push);
-    printf("\t\tACK : %d\n",ack);
-    printf("\t\tURG : %d\n",urg);
-    printf("\tWindow : %d\n",window);
-    printf("\tChecksum : %d\n",cksum);
-    printf("\tUrgent Pointer : %d\n",urg_pointer);
+    printf("%*c+ TCP :\n",TSP_SPACE, ' ');
+    printf("\t%*c| Source Port : %d\n",TSP_SPACE, ' ', *port_src);
+    printf("\t%*c| Destination Port : %d\n",TSP_SPACE, ' ',*port_dst);
+    printf("\t%*c| Sequence number : %d\n",TSP_SPACE, ' ',seq);
+    printf("\t%*c| Ack number : %d\n",TSP_SPACE, ' ',ack_seq);
+    printf("\t%*c| Data Offset : %d\n",TSP_SPACE, ' ', data_offset );
+    printf("\t%*c| Flags :\n",TSP_SPACE, ' ');
+    printf("\t%*c  - FIN : %d\n",TSP_SPACE, ' ',fin);
+    printf("\t%*c  - SYN : %d\n",TSP_SPACE, ' ',syn);
+    printf("\t%*c  - RST : %d\n",TSP_SPACE, ' ',rst);
+    printf("\t%*c  - PSH : %d\n",TSP_SPACE, ' ',push);
+    printf("\t%*c  - ACK : %d\n",TSP_SPACE, ' ',ack);
+    printf("\t%*c  - URG : %d\n",TSP_SPACE, ' ',urg);
+    printf("\t%*c| Window : %d\n",TSP_SPACE, ' ',window);
+    printf("\t%*c| Checksum : %d\n",TSP_SPACE, ' ',cksum);
+    printf("\t%*c| Urgent Pointer : %d\n",TSP_SPACE, ' ',urg_pointer);
+    printf("\t%*c+____\n",TSP_SPACE, ' ');
+    printf("\n");
 }

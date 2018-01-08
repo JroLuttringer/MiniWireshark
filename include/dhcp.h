@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include "../include/bootp.h"
 #include <stdio.h>
+#include "../include/utils.h"
 
 
 void process_bootp(const u_char* packet);

@@ -5,6 +5,7 @@
 #include <netinet/udp.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h> 
+#include "../include/utils.h"
 
 void process_udp(const u_char* , int* , int* , int* );
 

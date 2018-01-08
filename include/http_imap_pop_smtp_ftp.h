@@ -2,6 +2,7 @@
 #define __HTTP_H__
 
 #include "../include/packet_processing.h"
+#include "../include/utils.h"
 
 void process_http(const u_char*,int, int);
 void process_imap(const u_char*,int, int);

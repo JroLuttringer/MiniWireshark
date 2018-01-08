@@ -3,7 +3,7 @@
 
 void process_telnet(const u_char* packet, int data_size){
   int i = 0;
-  printf("TELNET: \n");
+  printf("%*c+ TELNET: \n",APP_SPACE,' ');
   while (i < data_size){
     if(packet[i] == IAC) {
         i++; // carac IAC lu & afficher commande
@@ -13,7 +13,7 @@ void process_telnet(const u_char* packet, int data_size){
         if(packet[i]==SB){
           display_option(packet[++i]);
           while(!(packet[i]==IAC) && packet[i+1] == SE)
-            printf(" %d", packet[i++]);
+            printf("%*c| %d", APP_SPACE,' ',packet[i++]);
           printf("\n");
         // sinon affichier l'option
         } else {

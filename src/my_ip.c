@@ -22,11 +22,9 @@ char* protocol_name(int id) {
 int process_ip(const u_char* packet) {
   const struct ip* ip;
   ip = (struct ip*)(packet);
-  printf("IP :\n");
-  printf(
-      "\tHeader Length : %d \n\tVersion : %d \n\tToS : 0x%02x \n\tLength : %d \n\tID "
-      ": %d",
-      ip->ip_hl, ip->ip_v, ip->ip_tos, ntohs(ip->ip_len), ntohs(ip->ip_id));
+  printf("  + IP :\n");
+  printf("\t  | Header Length : %d \n\t  | Version : %d \n\t  | ToS : 0x%02x \n\t  | Length : %d \n\t  | ID: %d",
+  ip->ip_hl, ip->ip_v, ip->ip_tos, ntohs(ip->ip_len), ntohs(ip->ip_id));
 
   int reserved, dontfrag, morefrag, foffset;
   uint16_t flags = ntohs(ip->ip_off);
@@ -37,17 +35,16 @@ int process_ip(const u_char* packet) {
   flags = flags >> 13;
 
   printf(
-      "\n\tFlags : 0x%02x\n\t\t Reserved bit : %d\n\t\t Don't Fragment : "
-      "%d\n\t\t More Fragments : %d\n\tFragment Offset : %d\n\tttl : %d "
-      "\n\tProtocol : %s (%d) \n\tChecksum : "
-      "%d\n",
+      "\n\t  | Flags : 0x%02x\n\t    - Reserved bit : %d\n\t    - Don't Fragment : %d\n\t    - More Fragments : %d\n\t  | Fragment Offset : %d\n\t  | ttl : %d \n\t  | Protocol : %s (%d) \n\t  | Checksum : %d\n",
       flags, reserved, dontfrag, morefrag, foffset, ip->ip_ttl, protocol_name(ip->ip_p),
       ip->ip_p, ip->ip_sum);
 
   struct in_addr ip_src, ip_dst;
   ip_src = ip->ip_src;
   ip_dst = ip->ip_dst;
-  printf("\tSource : %s\n", inet_ntoa(ip_src));
-  printf("\tDest : %s\n", inet_ntoa(ip_dst));
+  printf("\t  | Source : %s\n", inet_ntoa(ip_src));
+  printf("\t  | Dest : %s\n", inet_ntoa(ip_dst));
+  printf("\t  +____\n");
+  printf("\n");
   return ip->ip_p;
 }

@@ -4,7 +4,7 @@
 
 
 void process_http(const u_char* packet, int length, int is_response){
-    printf("HTTP");
+    printf("%*c+ HTTP",APP_SPACE,' ');
     if(!is_response){
         printf(" REQUEST: \n");
     } else {
@@ -14,7 +14,7 @@ void process_http(const u_char* packet, int length, int is_response){
 }
 
 void process_imap(const u_char* packet, int length, int is_response){
-    printf("IMAP");
+    printf("%*c+ IMAP",APP_SPACE,' ');
     if(!is_response){
         printf(" REQUEST: \n");
     } else {
@@ -24,7 +24,7 @@ void process_imap(const u_char* packet, int length, int is_response){
 }
 
 void process_pop(const u_char* packet, int length, int is_response){
-    printf("POP");
+    printf("%*c+ POP",APP_SPACE,' ');
     if(!is_response){
         printf(" REQUEST: \n");
     } else {
@@ -34,7 +34,7 @@ void process_pop(const u_char* packet, int length, int is_response){
 }
 
 void process_smtp(const u_char* packet, int length, int is_response){
-    printf("SMTP");
+    printf("%*c+ SMTP",APP_SPACE,' ');
     if(!is_response){
         printf(" REQUEST: \n");
     } else {
@@ -44,7 +44,7 @@ void process_smtp(const u_char* packet, int length, int is_response){
 }
 
 void process_ftp(const u_char* packet, int length, int is_response){
-    printf("FTP");
+    printf("%*c+ FTP",APP_SPACE,' ');
     if(!is_response){
         printf(" REQUEST: \n");
     } else {

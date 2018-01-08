@@ -5,6 +5,7 @@
 #include <netinet/ip.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "../include/utils.h"
 
 #define RESERVED 0b10000000
 #define DONTFRAG 0b01000000

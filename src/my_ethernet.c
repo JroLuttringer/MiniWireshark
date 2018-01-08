@@ -33,13 +33,14 @@ char* ethernet_type(const struct ether_header* ethernet) {
 void process_ethernet(const u_char* packet, int* network_id) {
   struct ether_header* ethernet;
   ethernet = (struct ether_header*)(packet);
-  printf("\nEthernet :\n");
-  printf("\tSource        : ");
+  printf("\n+ Ethernet :\n");
+  printf("\t| Source        : ");
   ethaddr2hexa(ethernet->ether_shost);
-  printf("\tDestination   : ");
+  printf("\t| Destination   : ");
   ethaddr2hexa(ethernet->ether_dhost);
-  printf("\tType : %s 0x%04x \n\n", ethernet_type(ethernet),
+  printf("\t| Type : %s 0x%04x \n", ethernet_type(ethernet),
      ntohs(ethernet->ether_type)
     );
+  printf("\t+___\n\n");
   *network_id = ethernet->ether_type;
 }

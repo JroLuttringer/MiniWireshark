@@ -18,6 +18,8 @@
 #include "../include/http_imap_pop_smtp_ftp.h"
 #include "../include/telnet.h"
 #include "../include/dhcp.h"
+#include "../include/dns.h"
+#include "../include/utils.h"
 
 #define MAX_BYTE     15000
 #define PROMISC_MODE 1
