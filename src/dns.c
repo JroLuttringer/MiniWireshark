@@ -34,9 +34,9 @@ void process_dns( const u_char* packet){
   printf("\t%*c| ID: %d\n",APP_SPACE,' ' ,ntohs(dns_info->id));
   printf("\t%*c| Type: ",APP_SPACE,' ');
   if(dns_info->qr){
-    printf("Response");
+    printf("Response\n");
   } else {
-    printf("Request"); // 0
+    printf("Request\n"); // 0
   }
   printf("\t%*c| Flags: ",APP_SPACE,' ');
   print_dns_opcode(dns_info -> opcode);
@@ -89,19 +89,19 @@ void process_dns( const u_char* packet){
       struct resource* r = (struct resource*) following_info;
       printf("\t%*c  - Type: %d\n",APP_SPACE,' ', ntohs(r->type));
       printf("\t%*c  - Class: %d\n",APP_SPACE,' ', ntohs(r->clss));
-      printf("\t%*c  - Ttl: %d\n",APP_SPACE,' ', ntohs(r->ttl));
+      printf("\t%*c  - Ttl: %d\n",APP_SPACE,' ', ntohl(r->ttl));
       printf("\t%*c  - Length: %d\n",APP_SPACE,' ', ntohs(r->length));
       following_info += RSRLEN;
       printf("\t%*c  - Data: ",APP_SPACE,' ');
-      if(ntohs(r->type) == 2){
-        get_name(packet, following_info);
-      } else if (ntohs(r->type)==1){
-        int j;
-        for(j=0; j<ntohs(r->length); j++){
+    //  if(ntohs(r->type) == 2){
+    //    get_name(packet, following_info);
+    //  } else if (ntohs(r->type)==1){
+      int j;
+      for(j=0; j<ntohs(r->length); j++){
+        if(isprint(following_info[j]))
           printf("%c", following_info[j]);
-        }
-        
-      }
+      }   
+    //  }
       printf("\n");
       printf("\t%*c --\n\n",APP_SPACE,' ');
       following_info += ntohs(r->length);
@@ -118,10 +118,16 @@ void process_dns( const u_char* packet){
       struct resource* r = (struct resource*) following_info;
       printf("\t%*c  - Type: %d\n",APP_SPACE,' ', ntohs(r->type));
       printf("\t%*c  - Class: %d\n",APP_SPACE,' ', ntohs(r->clss));
-      printf("\t%*c  - Ttl: %d\n",APP_SPACE,' ', ntohs(r->ttl));
+      printf("\t%*c  - Ttl: %d\n",APP_SPACE,' ', ntohl(r->ttl));
       printf("\t%*c  - Length: %d\n",APP_SPACE,' ', ntohs(r->length));
-      following_info += ntohs(r->length);
+      following_info += RSRLEN;
+      int j;
+      for(j=0; j<ntohs(r->length); j++){
+        if(isprint(following_info[j]))
+          printf("%c", following_info[j]);
+      }
       printf("\t%*c --\n\n",APP_SPACE,' ');
+      following_info += ntohs(r->length);
     }
   }
 
@@ -135,37 +141,41 @@ void process_dns( const u_char* packet){
       struct resource* r = (struct resource*) following_info;
       printf("\t%*c  - Type: %d\n",APP_SPACE,' ', ntohs(r->type));
       printf("\t%*c  - Class: %d\n",APP_SPACE,' ', ntohs(r->clss));
-      printf("\t%*c  - Ttl: %d\n",APP_SPACE,' ', ntohs(r->ttl));
+      printf("\t%*c  - Ttl: %d\n",APP_SPACE,' ', ntohl(r->ttl));
       printf("\t%*c  - Length: %d\n",APP_SPACE,' ', ntohs(r->length));
-      following_info += ntohs(r->length);
+      following_info += RSRLEN;
+      int j;
+      for(j=0; j<ntohs(r->length); j++){
+        if(isprint(following_info[j]))
+          printf("%c", following_info[j]);
+      }
       printf("\t%*c --\n\n",APP_SPACE,' ');
+      following_info += ntohs(r->length);
     }
   }
 }
 
 int get_name(const u_char* packet,const u_char* sub ){
-  int i;
-  int length=2;
-  //check if pointer
-  if(((u_int8_t)sub[0] & PTRMASK) == PTRVALUE){
-
-    u_int16_t offset = sub[0] << 8;
-    offset |= sub[1];
-    offset &= PTRINDEXMASK;
-    get_name(packet, packet+offset);
-    length=2;
-  } else { // if name
-    // print name
-    i=1;
-    while(sub[i] != 0) {
-      if(isprint(sub[i]))
-        printf("%c",sub[i]);
+  int is_ptr;
+  int length=0;
+  while(sub[length] != 0){
+    if(((u_int8_t)sub[length] & PTRMASK) == PTRVALUE){
+      u_int16_t offset = sub[length] << 8;
+      offset |= sub[length+1];
+      offset &= PTRINDEXMASK;
+      is_ptr = 1;
+      get_name(packet, packet+offset);
+      return 2;
+    } else {
+      if(isprint(sub[length+1]) && sub[length+1] != '\n')
+        printf("%c",sub[length+1]);
       else
         printf(".");
-      i++;
       length++;
+      is_ptr=0;
     }
   }
+  if(!is_ptr) length++;
   return length;
 }
 
